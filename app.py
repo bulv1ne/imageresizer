@@ -19,6 +19,7 @@ def init(loop, host, port):
 
 @asyncio.coroutine
 def handle(request):
+    print(request.path_qs)
     query_components = parse_qs(urlparse(request.path_qs).query)
     url = query_components['source'][0]
     resize = list(map(int, query_components['resize'][0].split('x')))
