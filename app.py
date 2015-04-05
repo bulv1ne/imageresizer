@@ -1,5 +1,5 @@
 import io
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qsl, urlparse
 
 import aiohttp
 import asyncio
@@ -20,10 +20,10 @@ def init(loop, host, port):
 @asyncio.coroutine
 def handle(request):
     print(request.path_qs)
-    query_components = parse_qs(urlparse(request.path_qs).query)
+    query_components = dict(parse_qsl(urlparse(request.path_qs).query))
     try:
-        url = query_components['source'][0]
-        resize = list(map(int, query_components['resize'][0].split('x')))
+        url = query_components['source']
+        resize = list(map(int, query_components['resize'].split('x')))
     except (KeyError, ValueError):
         raise web.HTTPBadRequest
 
