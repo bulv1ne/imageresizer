@@ -21,12 +21,21 @@ def init(loop, host, port):
 def handle(request):
     print(request.path_qs)
     query_components = parse_qs(urlparse(request.path_qs).query)
-    url = query_components['source'][0]
-    resize = list(map(int, query_components['resize'][0].split('x')))
+    try:
+        url = query_components['source'][0]
+        resize = list(map(int, query_components['resize'][0].split('x')))
+    except (KeyError, ValueError):
+        raise web.HTTPBadRequest
 
     data = yield from download_file(url)
-    img = Image.open(data)
-    img.thumbnail(resize)
+    try:
+        img = Image.open(data)
+    except OSError:
+        raise web.HTTPBadRequest
+    try:
+        img.thumbnail(resize)
+    except IndexError:
+        raise web.HTTPBadRequest
 
     stream = web.StreamResponse()
     stream.content_type = 'image/' + img.format.lower()
@@ -38,6 +47,8 @@ def handle(request):
 @asyncio.coroutine
 def download_file(url):
     req = yield from aiohttp.request('GET', url)
+    if req.status == 404:
+        raise web.HTTPNotFound
     fd = io.BytesIO()
     while True:
         chunk = yield from req.content.read(1024)
