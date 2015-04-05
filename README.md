@@ -9,7 +9,7 @@ docker run -d -p 8000:8000 bulv1ne/imageresizer
 ```
 
 Then visit the url:
-`http://127.0.0.1:8000/?resize=100x100&source=https://placekitten.com/g/200/300`
+http://127.0.0.1:8000/?resize=100x100&source=https://placekitten.com/g/200/300
 
 
 ## Nginx proxy cache
@@ -40,5 +40,5 @@ http://example.com/resize?resize=100x100&source=https://placekitten.com/g/200/30
 First time it will load as slow as usual, second time it will return the cached response.
 
 More info:
-- [http://nginx.com/resources/admin-guide/caching/](Caching guide)
-- [http://nginx.org/en/docs/http/ngx_http_proxy_module.html](Http proxy module)
+- [Caching guide](http://nginx.com/resources/admin-guide/caching/)
+- [Http proxy module](http://nginx.org/en/docs/http/ngx_http_proxy_module.html)
