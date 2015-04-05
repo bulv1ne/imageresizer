@@ -37,11 +37,7 @@ def handle(request):
     except IndexError:
         raise web.HTTPBadRequest
 
-    stream = web.StreamResponse()
-    stream.content_type = 'image/' + img.format.lower()
-    stream.start(request)
-    img.save(stream, format=img.format)
-    return stream
+    return stream_from_image(img, request=request)
 
 
 @asyncio.coroutine
@@ -57,6 +53,14 @@ def download_file(url):
         fd.write(chunk)
     fd.seek(0)
     return fd
+
+
+def stream_from_image(img, request):
+    stream = web.StreamResponse()
+    stream.content_type = 'image/' + img.format.lower()
+    stream.start(request)
+    img.save(stream, format=img.format)
+    return stream
 
 HOST = '0.0.0.0'
 PORT = 8000
