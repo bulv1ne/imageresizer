@@ -35,7 +35,7 @@ server {
 
 Then the new url will be:
 
-http://example.com/resize?resize=100x100&source=https://placekitten.com/g/200/300`
+http://example.com/resize?resize=100x100&source=https://placekitten.com/g/200/300
 
 First time it will load as slow as usual, second time it will return the cached response.
 

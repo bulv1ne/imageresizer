@@ -29,9 +29,9 @@ def handle(request):
     img.thumbnail(resize)
 
     stream = web.StreamResponse()
-    stream.content_type = 'image/jpeg'
+    stream.content_type = 'image/' + img.format.lower()
     stream.start(request)
-    img.save(stream, format='JPEG')
+    img.save(stream, format=img.format)
     return stream
 
 
