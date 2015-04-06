@@ -5,6 +5,8 @@ import aiohttp
 import asyncio
 from aiohttp import web
 from PIL import Image
+from validation import schema
+from voluptuous import MultipleInvalid
 
 
 @asyncio.coroutine
@@ -22,10 +24,12 @@ def handle(request):
     print(request.path_qs)
     query_components = dict(parse_qsl(urlparse(request.path_qs).query))
     try:
-        url = query_components['source']
-        resize = list(map(int, query_components['resize'].split('x')))
-    except (KeyError, ValueError):
+        query_components = schema(query_components)
+    except MultipleInvalid:
         raise web.HTTPBadRequest
+
+    url = query_components['source']
+    resize = query_components['resize']
 
     data = yield from download_file(url)
     try:
