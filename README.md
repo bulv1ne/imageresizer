@@ -24,9 +24,14 @@ server {
     location /resize {
         proxy_pass http://127.0.0.1:8000/; # The running docker container
         proxy_cache img_resize;
+        proxy_cache_key $request_uri;
+        proxy_cache_valid 30d;
+        proxy_hide_header Set-Cookie;
+        proxy_ignore_headers "Set-Cookie";
         expires max;
         add_header Pragma public;
         add_header Cache-Control "public";
+        add_header X-Proxy-Cache $upstream_cache_status;
     }
 
     # ... more location configuration
