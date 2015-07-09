@@ -5,4 +5,4 @@ RUN pip install -r requirements.txt
 RUN useradd -s /bin/bash user
 USER user
 EXPOSE 8000
-ENTRYPOINT python app.py
+CMD python app.py
