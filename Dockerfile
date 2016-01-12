@@ -1,4 +1,4 @@
-FROM python
+FROM python:3.5
 ADD . /project
 WORKDIR /project
 RUN pip install -r requirements.txt
