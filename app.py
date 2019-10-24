@@ -1,26 +1,24 @@
+import asyncio
 import io
 from urllib.parse import parse_qsl, urlparse
 
 import aiohttp
-import asyncio
 from aiohttp import web
 from PIL import Image
 from validation import schema
 from voluptuous import MultipleInvalid
 
 
-@asyncio.coroutine
-def init(loop, host, port):
+async def init(loop, host, port):
     app = web.Application(loop=loop)
-    app.router.add_route('GET', '/', handle)
+    app.router.add_route("GET", "/", handle)
 
-    srv = yield from loop.create_server(app.make_handler(), host, port)
-    print('Server started at http://{}:{}'.format(host, port))
+    srv = await loop.create_server(app.make_handler(), host, port)
+    print("Server started at http://{}:{}".format(host, port))
     return srv
 
 
-@asyncio.coroutine
-def handle(request):
+async def handle(request):
     print(request.path_qs)
     query_components = dict(parse_qsl(urlparse(request.path_qs).query))
     try:
@@ -28,10 +26,10 @@ def handle(request):
     except MultipleInvalid:
         raise web.HTTPBadRequest
 
-    url = query_components['source']
-    resize = query_components['resize']
+    url = query_components["source"]
+    resize = query_components["resize"]
 
-    data = yield from download_file(url)
+    data = await download_file(url)
     try:
         img = Image.open(data)
     except OSError:
@@ -41,34 +39,38 @@ def handle(request):
     except IndexError:
         raise web.HTTPBadRequest
 
-    return stream_from_image(img, request=request)
+    return await stream_from_image(img, request=request)
 
 
-@asyncio.coroutine
-def download_file(url):
-    req = yield from aiohttp.request('GET', url)
-    if req.status == 404:
-        raise web.HTTPNotFound
-    fd = io.BytesIO()
-    while True:
-        chunk = yield from req.content.read(1024)
-        if not chunk:
-            break
-        fd.write(chunk)
-    fd.seek(0)
-    return fd
+async def download_file(url):
+    async with aiohttp.ClientSession() as session:
+        req = await session.get(url)
+        if req.status == 404:
+            raise web.HTTPNotFound
+        fd = io.BytesIO()
+        while True:
+            chunk = await req.content.read(1024)
+            if not chunk:
+                break
+            fd.write(chunk)
+        fd.seek(0)
+        return fd
 
 
-def stream_from_image(img, request):
+async def stream_from_image(img, request):
     stream = web.StreamResponse()
-    stream.content_type = 'image/' + img.format.lower()
-    stream.start(request)
-    img.save(stream, format=img.format)
+    stream.content_type = "image/" + img.format.lower()
+    await stream.prepare(request)
+    data = io.BytesIO()
+    img.save(data, format=img.format)
+    await stream.write(data.getvalue())
     return stream
 
-HOST = '0.0.0.0'
+
+HOST = "0.0.0.0"
 PORT = 8000
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(init(loop, HOST, PORT))
-loop.run_forever()
+if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(init(loop, HOST, PORT))
+    loop.run_forever()
