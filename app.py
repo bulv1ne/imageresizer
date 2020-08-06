@@ -9,13 +9,12 @@ from validation import schema
 from voluptuous import MultipleInvalid
 
 
-async def init(loop, host, port):
-    app = web.Application(loop=loop)
-    app.router.add_route("GET", "/", handle)
+def main(host, port):
+    app = web.Application()
+    app.add_routes([web.get("/", handle)])
 
-    srv = await loop.create_server(app.make_handler(), host, port)
     print("Server started at http://{}:{}".format(host, port))
-    return srv
+    web.run_app(app, host=host, port=port)
 
 
 async def handle(request):
@@ -71,6 +70,4 @@ HOST = "0.0.0.0"
 PORT = 8000
 
 if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(init(loop, HOST, PORT))
-    loop.run_forever()
+    main(HOST, PORT)
