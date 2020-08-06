@@ -1,12 +1,12 @@
-import asyncio
 import io
 from urllib.parse import parse_qsl, urlparse
 
 import aiohttp
 from aiohttp import web
 from PIL import Image
-from validation import schema
 from voluptuous import MultipleInvalid
+
+from validation import schema
 
 
 def main(host, port):
@@ -69,5 +69,5 @@ async def stream_from_image(img, request):
 HOST = "0.0.0.0"
 PORT = 8000
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(HOST, PORT)
